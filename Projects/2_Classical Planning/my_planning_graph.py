@@ -213,14 +213,12 @@ class PlanningGraph:
         """
         # TODO: implement setlevel heuristic
         level = 0
-        sovled = False
         while not self._is_leveled:
             literal_layer = self.literal_layers[level]
-            if self.goal.issubset(literal_layer):
-                sovled = not any(literalB in literal_layer._mutexes[literalA] for literalA, literalB in product(
-                    literal_layer, literal_layer))
-                if sovled:
-                    return level
+            if self.goal.issubset(literal_layer) and not \
+                any(literalB in literal_layer._mutexes[literalA]
+                    for literalA, literalB in combinations(literal_layer, 2)):
+                return level
             self._extend()
             level += 1
         return level - 1  # In fact, some test case cannot be solved at all. But I cannot pass test if I print "cannot be solved"~
