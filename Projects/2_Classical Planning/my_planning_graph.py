@@ -135,7 +135,7 @@ class PlanningGraph:
         goals = list(self.goal)
         tmp = []
         cost = level = 0
-        while goals and not self._is_leveled:
+        while goals:
             while goals:
                 goal = goals.pop()
                 if goal in self.literal_layers[level]:
@@ -143,6 +143,8 @@ class PlanningGraph:
                 else:
                     tmp.append(goal)
             goals, tmp = tmp, goals
+            if self._is_leveled:
+                break
             self._extend()
             level += 1
         return "Goals cannot be achieved!" if goals else cost
@@ -176,8 +178,9 @@ class PlanningGraph:
         """
         goals = list(self.goal)
         tmp = []
-        level = 0
-        while goals and not self._is_leveled:
+        level = -1
+        while goals:
+            level += 1
             while goals:
                 goal = goals.pop()
                 if goal in self.literal_layers[level]:
@@ -185,9 +188,10 @@ class PlanningGraph:
                 else:
                     tmp.append(goal)
             goals, tmp = tmp, goals
+            if self._is_leveled:
+                break
             self._extend()
-            level += 1
-        return "Goals cannot be achieved!" if goals else level-1
+        return "Goals cannot be achieved!" if goals else level
 
     def h_setlevel(self):
         """ Calculate the set level heuristic for the planning graph
@@ -212,16 +216,44 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic on complex problems
         """
         # TODO: implement setlevel heuristic
-        level = 0
-        while not self._is_leveled:
-            literal_layer = self.literal_layers[level]
-            if self.goal.issubset(literal_layer) and not \
-                any(literalB in literal_layer._mutexes[literalA]
-                    for literalA, literalB in combinations(literal_layer, 2)):
-                return level
-            self._extend()
-            level += 1
-        return level - 1  # In fact, some test case cannot be solved at all. But I cannot pass test if I print "cannot be solved"~
+        # level = 0
+        # while 1:
+        #     s = self.literal_layers[level]
+        #     if self.goal.issubset(s) and not any(s.is_mutex(a, b) for a, b in combinations(s, 2)):
+        #         return level
+        #     if self._is_leveled:
+        #         break
+        #     self._extend()
+        #     level += 1
+        # # return "Goals cannot be achieved!"
+        # for a, b in combinations(s, 2):
+        #     if s.is_mutex(a, b):
+        #         print(a, b, s)
+        # return level-1
+
+        # self.fill()
+        # for level, s in enumerate(self.literal_layers):
+        #     if self.goal.issubset(s) and not any(s.is_mutex(a, b) for a, b in combinations(s, 2)):
+        #         return level
+        # return None
+
+        self.fill()
+        for i, layer in enumerate(self.literal_layers):
+            all_goals_met = self.goal.issubset(layer)
+            if not all_goals_met:
+                continue
+            goals_are_mutex = False
+            for goalA in self.goal:
+                for goalB in self.goal:
+                    if layer.is_mutex(goalA, goalB):
+                        print(goalA, goalB)
+                        goals_are_mutex = True
+            if not goals_are_mutex:
+                print("all_goals_met", all_goals_met,
+                      self.goal.issubset(layer))
+                print("goals_are_mutex", goals_are_mutex, not any(
+                    layer.is_mutex(a, b) for a, b in combinations(layer, 2)))
+                return i
 
     ##############################################################################
     #                     DO NOT MODIFY CODE BELOW THIS LINE                     #
