@@ -964,3 +964,226 @@ Fly(P3, SFO, JFK)
 Unload(C2, P2, SFO)
 Unload(C1, P3, JFK)
 
+
+Solving Air Cargo Problem 3 using breadth_first_search...
+
+# Actions   Expansions   Goal Tests   New Nodes
+    88        14663       18098       129625  
+
+Plan length: 12  Time elapsed in seconds: 1.5103823034857518
+Load(C1, P1, SFO)
+Load(C2, P2, JFK)
+Fly(P2, JFK, ORD)
+Load(C4, P2, ORD)
+Fly(P1, SFO, ATL)
+Load(C3, P1, ATL)
+Fly(P1, ATL, JFK)
+Unload(C1, P1, JFK)
+Unload(C3, P1, JFK)
+Fly(P2, ORD, SFO)
+Unload(C2, P2, SFO)
+Unload(C4, P2, SFO)
+
+
+Solving Air Cargo Problem 4 using breadth_first_search...
+
+# Actions   Expansions   Goal Tests   New Nodes
+   104        99736       114953      944130  
+
+Plan length: 14  Time elapsed in seconds: 8.002381281116913
+Load(C1, P1, SFO)
+Fly(P1, SFO, ATL)
+Load(C3, P1, ATL)
+Fly(P1, ATL, ORD)
+Load(C4, P1, ORD)
+Load(C5, P1, ORD)
+Fly(P1, ORD, JFK)
+Load(C2, P1, JFK)
+Unload(C1, P1, JFK)
+Unload(C3, P1, JFK)
+Unload(C5, P1, JFK)
+Fly(P1, JFK, SFO)
+Unload(C2, P1, SFO)
+Unload(C4, P1, SFO)
+
+
+Solving Air Cargo Problem 3 using greedy_best_first_graph_search with h_unmet_goals...
+
+# Actions   Expansions   Goal Tests   New Nodes
+    88          25          27         230    
+
+Plan length: 15  Time elapsed in seconds: 0.0557330729744514
+Load(C1, P1, SFO)
+Load(C2, P2, JFK)
+Fly(P2, JFK, SFO)
+Unload(C2, P2, SFO)
+Fly(P2, SFO, ORD)
+Load(C4, P2, ORD)
+Fly(P2, ORD, SFO)
+Unload(C4, P2, SFO)
+Fly(P2, SFO, ATL)
+Load(C3, P2, ATL)
+Fly(P2, ATL, JFK)
+Unload(C3, P2, JFK)
+Fly(P2, JFK, SFO)
+Fly(P1, SFO, JFK)
+Unload(C1, P1, JFK)
+
+
+Solving Air Cargo Problem 4 using greedy_best_first_graph_search with h_unmet_goals...
+
+# Actions   Expansions   Goal Tests   New Nodes
+   104          29          31         280    
+
+Plan length: 18  Time elapsed in seconds: 0.040180574663333246
+Load(C1, P1, SFO)
+Load(C2, P2, JFK)
+Fly(P2, JFK, SFO)
+Unload(C2, P2, SFO)
+Fly(P2, SFO, ORD)
+Load(C4, P2, ORD)
+Load(C5, P2, ORD)
+Fly(P2, ORD, SFO)
+Unload(C4, P2, SFO)
+Fly(P2, SFO, JFK)
+Unload(C5, P2, JFK)
+Fly(P2, JFK, ATL)
+Load(C3, P2, ATL)
+Fly(P2, ATL, JFK)
+Unload(C3, P2, JFK)
+Fly(P2, JFK, SFO)
+Fly(P1, SFO, JFK)
+Unload(C1, P1, JFK)
+
+
+Solving Air Cargo Problem 3 using greedy_best_first_graph_search with h_pg_levelsum...
+
+# Actions   Expansions   Goal Tests   New Nodes
+    88          14          16         126    
+
+Plan length: 14  Time elapsed in seconds: 11.063586986000779
+Load(C1, P1, SFO)
+Fly(P1, SFO, ORD)
+Load(C2, P2, JFK)
+Fly(P2, JFK, SFO)
+Unload(C2, P2, SFO)
+Fly(P2, SFO, ATL)
+Load(C3, P2, ATL)
+Fly(P2, ATL, JFK)
+Unload(C3, P2, JFK)
+Load(C4, P1, ORD)
+Fly(P1, ORD, SFO)
+Unload(C4, P1, SFO)
+Fly(P1, SFO, JFK)
+Unload(C1, P1, JFK)
+
+
+Solving Air Cargo Problem 4 using greedy_best_first_graph_search with h_pg_levelsum...
+
+# Actions   Expansions   Goal Tests   New Nodes
+   104          17          19         165    
+
+Plan length: 17  Time elapsed in seconds: 16.052550087032845
+Fly(P2, JFK, ORD)
+Load(C1, P1, SFO)
+Fly(P1, SFO, JFK)
+Unload(C1, P1, JFK)
+Load(C2, P1, JFK)
+Fly(P1, JFK, SFO)
+Unload(C2, P1, SFO)
+Fly(P1, SFO, ATL)
+Load(C3, P1, ATL)
+Fly(P1, ATL, JFK)
+Unload(C3, P1, JFK)
+Load(C4, P2, ORD)
+Load(C5, P2, ORD)
+Fly(P2, ORD, SFO)
+Unload(C4, P2, SFO)
+Fly(P2, SFO, JFK)
+Unload(C5, P2, JFK)
+
+
+Solving Air Cargo Problem 3 using astar_search with h_unmet_goals...
+
+# Actions   Expansions   Goal Tests   New Nodes
+    88         7388        7390       65711   
+
+Plan length: 12  Time elapsed in seconds: 2.330263761298248
+Load(C2, P2, JFK)
+Fly(P2, JFK, ATL)
+Load(C3, P2, ATL)
+Fly(P2, ATL, ORD)
+Load(C4, P2, ORD)
+Fly(P2, ORD, SFO)
+Unload(C4, P2, SFO)
+Unload(C2, P2, SFO)
+Load(C1, P2, SFO)
+Fly(P2, SFO, JFK)
+Unload(C3, P2, JFK)
+Unload(C1, P2, JFK)
+
+
+Solving Air Cargo Problem 4 using astar_search with h_unmet_goals...
+
+# Actions   Expansions   Goal Tests   New Nodes
+   104        34330       34332       328509  
+
+Plan length: 14  Time elapsed in seconds: 7.226641255376883
+Load(C2, P2, JFK)
+Fly(P2, JFK, ATL)
+Load(C3, P2, ATL)
+Fly(P2, ATL, ORD)
+Load(C4, P2, ORD)
+Load(C5, P2, ORD)
+Fly(P2, ORD, SFO)
+Unload(C4, P2, SFO)
+Unload(C2, P2, SFO)
+Load(C1, P2, SFO)
+Fly(P2, SFO, JFK)
+Unload(C5, P2, JFK)
+Unload(C3, P2, JFK)
+Unload(C1, P2, JFK)
+
+
+Solving Air Cargo Problem 3 using astar_search with h_pg_levelsum...
+
+# Actions   Expansions   Goal Tests   New Nodes
+    88         369         371         3403   
+
+Plan length: 12  Time elapsed in seconds: 189.56985844629523
+Load(C1, P1, SFO)
+Fly(P1, SFO, ATL)
+Load(C3, P1, ATL)
+Fly(P1, ATL, JFK)
+Load(C2, P2, JFK)
+Fly(P2, JFK, ORD)
+Load(C4, P2, ORD)
+Fly(P2, ORD, SFO)
+Unload(C4, P2, SFO)
+Unload(C3, P1, JFK)
+Unload(C2, P2, SFO)
+Unload(C1, P1, JFK)
+
+
+Solving Air Cargo Problem 4 using astar_search with h_pg_levelsum...
+
+# Actions   Expansions   Goal Tests   New Nodes
+   104         1208        1210       12210   
+
+Plan length: 15  Time elapsed in seconds: 1009.4484061236935
+Load(C1, P1, SFO)
+Fly(P1, SFO, ORD)
+Load(C4, P1, ORD)
+Load(C5, P1, ORD)
+Fly(P1, ORD, JFK)
+Unload(C5, P1, JFK)
+Unload(C1, P1, JFK)
+Load(C2, P1, JFK)
+Fly(P1, JFK, SFO)
+Fly(P2, JFK, ATL)
+Load(C3, P2, ATL)
+Fly(P2, ATL, JFK)
+Unload(C4, P1, SFO)
+Unload(C3, P2, JFK)
+Unload(C2, P1, SFO)
+
