@@ -40,11 +40,8 @@ class ActionLayer(BaseActionLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
-        for exprA, exprB in product(actionA.preconditions, actionB.preconditions):
-            mutexes = self.parent_layer._mutexes.get(exprB)
-            if mutexes is not None and exprA in mutexes:
-                return True
-        return False
+        return any(self.parent_layer.is_mutex(exprA, exprB)
+                   for exprA, exprB in product(actionA.preconditions, actionB.preconditions))
 
 
 class LiteralLayer(BaseLiteralLayer):
@@ -57,11 +54,8 @@ class LiteralLayer(BaseLiteralLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
-        for actionA, actionB in product(self.parents[literalA], self.parents[literalB]):
-            mutexes = self.parent_layer._mutexes.get(actionA)
-            if mutexes is None or actionB not in mutexes:
-                return False
-        return True
+        return all(self.parent_layer.is_mutex(actionA, actionB)
+                   for actionA, actionB in product(self.parents[literalA], self.parents[literalB]))
 
     def _negation(self, literalA, literalB):
         """ Return True if two literals are negations of each other """
