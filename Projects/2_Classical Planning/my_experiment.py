@@ -8,27 +8,29 @@ def search_experiment(problems, searches, path):
     """[summary]
 
     Arguments:
+        searches {iterable} -- search algorithems
         problems {list} -- problems to be solved
         searches {iterable} -- search algorithems
         path {str} -- file to write experiment result
     """
-
-    log = open(path, "a+")
-    for search in searches:
-        f = io.StringIO()
-        with redirect_stdout(f):
-            main(problems, [search+1])
-        out = f.getvalue()
-        log.write(out)
-        print("search %d finished" % (search+1), datetime.now())
-    log.close()
+    for problem in problems:
+        for search in searches:
+            f = io.StringIO()
+            log = open(path, "a+")
+            with redirect_stdout(f):
+                main([problem], [search])
+            out = f.getvalue()
+            log.write(out)
+            log.close()
+            print("problem %d search %d finished" %
+                  (problem, search), datetime.now())
 
 
 def process_log_data(path):
     log = open(path, "r")
     process_log = open("processed_" + path, "a+")
     process_log.write(
-        "Problem Search Actions Expansions Goal_Tests New_Nodes Time_elapsed\n")
+        "Problem Search Actions Expansions Goal_Tests New_Nodes Plan_Length Time_Elapsed\n")
     row = []
     flag = 0
     for line in log:
@@ -49,9 +51,12 @@ def process_log_data(path):
         # Actions, Expansions, Goal Tests, New Nodes
         elif line.startswith("# Actions"):
             flag = 1
-        # Time elapsed
+        # Plan Length, Time elapsed
         elif line.startswith("Plan"):
-            start = line.index("seconds:") + len("seconds:")
+            start = line.index("length:") + len("length:")
+            end = line.index("seconds:")
+            row.append(line[start:end])
+            start = end + len("seconds:")
             row.append(line[start:])
             process_log.write(" ".join(map(lambda s: s.replace(' ', ''), row)))
             row = []
@@ -63,12 +68,10 @@ def process_log_data(path):
 
 if __name__ == "__main__":
     # run all of the search algorithms on the first two problems
-    search_experiment(problems=[1, 2], searches=range(
-        len(SEARCHES)), path="log.md")
-
     # run at least one uninformed search, two heuristics with greedy best first search
     # and two heuristics with A* on problems 3 and 4
-    search_experiment(problems=[3, 4], searches=[0, 3, 4, 7, 8], path="log.md")
+    # search_experiment(problems=range(1, 5), searches=range(
+    #     1, len(SEARCHES)+1), path="log.md")
 
     # process log data
-    process_log_data(path="log.md")
+    process_log_data(path="log1.md")
