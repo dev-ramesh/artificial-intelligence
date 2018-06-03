@@ -54,9 +54,9 @@ def process_log_data(path):
         # Plan Length, Time elapsed
         elif line.startswith("Plan"):
             start = line.index("length:") + len("length:")
-            end = line.index("seconds:")
+            end = line.index("Time")
             row.append(line[start:end])
-            start = end + len("seconds:")
+            start = line.index("seconds:") + len("seconds:")
             row.append(line[start:])
             process_log.write(" ".join(map(lambda s: s.replace(' ', ''), row)))
             row = []
