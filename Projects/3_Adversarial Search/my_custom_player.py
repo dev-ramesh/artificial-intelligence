@@ -48,52 +48,58 @@ class CustomPlayer(DataPlayer):
         #          (the timer is automatically managed for you)
         depth = 1
         while depth < 100:
+            # (my_moves - opponent_moves) heuristic from lecture
             self.queue.put(self.minimax(state, depth))
+            # (my_moves / opponent_moves) heuristic from mine
+            # self.queue.put(self.minimax(state, depth, True))
             depth += 1
 
-    def minimax(self, state, depth):
+    def minimax(self, state, depth, custom=False):
 
         alpha = float("-inf")
         beta = float("inf")
         best_move = None
         for a in state.actions():
-            v = self.min_value(state.result(a), depth - 1, alpha, beta)
+            v = self.min_value(state.result(a), depth - 1, alpha, beta, custom)
             if v > alpha:
                 alpha = v
                 best_move = a
         return best_move
 
-    def min_value(self, state, depth, alpha, beta):
+    def min_value(self, state, depth, alpha, beta, custom):
         if state.terminal_test():
             return state.utility(self.player_id)
         if depth <= 0:
-            return self.score(state)
+            return self.score(state, custom)
         value = float("inf")
         for action in state.actions():
             value = min(value, self.max_value(
-                state.result(action), depth - 1, alpha, beta))
+                state.result(action), depth - 1, alpha, beta, custom))
             beta = min(beta, value)
             if beta <= alpha:
                 return value
         return value
 
-    def max_value(self, state, depth, alpha, beta):
+    def max_value(self, state, depth, alpha, beta, custom):
         if state.terminal_test():
             return state.utility(self.player_id)
         if depth <= 0:
-            return self.score(state)
+            return self.score(state, custom)
         value = float("-inf")
         for action in state.actions():
             value = max(value, self.min_value(
-                state.result(action), depth - 1, alpha, beta))
+                state.result(action), depth - 1, alpha, beta, custom))
             alpha = max(alpha, value)
             if alpha >= beta:
                 return value
         return value
 
-    def score(self, state):
+    def score(self, state, custom):
         own_loc = state.locs[self.player_id]
         opp_loc = state.locs[1 - self.player_id]
         own_liberties = state.liberties(own_loc)
         opp_liberties = state.liberties(opp_loc)
-        return len(own_liberties) - len(opp_liberties)
+        if custom:
+            return len(own_liberties) / len(opp_liberties)
+        else:
+            return len(own_liberties) - len(opp_liberties)
