@@ -22,6 +22,7 @@ class CustomPlayer(DataPlayer):
       suitable for using any other machine learning techniques.
     **********************************************************************
     """
+
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
         available in the current state calls self.queue.put(ACTION) at least
@@ -45,5 +46,54 @@ class CustomPlayer(DataPlayer):
         # EXAMPLE: choose a random move without any search--this function MUST
         #          call self.queue.put(ACTION) at least once before time expires
         #          (the timer is automatically managed for you)
-        import random
-        self.queue.put(random.choice(state.actions()))
+        depth = 1
+        while depth < 100:
+            self.queue.put(self.minimax(state, depth))
+            depth += 1
+
+    def minimax(self, state, depth):
+
+        alpha = float("-inf")
+        beta = float("inf")
+        best_move = None
+        for a in state.actions():
+            v = self.min_value(state.result(a), depth - 1, alpha, beta)
+            if v > alpha:
+                alpha = v
+                best_move = a
+        return best_move
+
+    def min_value(self, state, depth, alpha, beta):
+        if state.terminal_test():
+            return state.utility(self.player_id)
+        if depth <= 0:
+            return self.score(state)
+        value = float("inf")
+        for action in state.actions():
+            value = min(value, self.max_value(
+                state.result(action), depth - 1, alpha, beta))
+            beta = min(beta, value)
+            if beta <= alpha:
+                return value
+        return value
+
+    def max_value(self, state, depth, alpha, beta):
+        if state.terminal_test():
+            return state.utility(self.player_id)
+        if depth <= 0:
+            return self.score(state)
+        value = float("-inf")
+        for action in state.actions():
+            value = max(value, self.min_value(
+                state.result(action), depth - 1, alpha, beta))
+            alpha = max(alpha, value)
+            if alpha >= beta:
+                return value
+        return value
+
+    def score(self, state):
+        own_loc = state.locs[self.player_id]
+        opp_loc = state.locs[1 - self.player_id]
+        own_liberties = state.liberties(own_loc)
+        opp_liberties = state.liberties(opp_loc)
+        return len(own_liberties) - len(opp_liberties)
