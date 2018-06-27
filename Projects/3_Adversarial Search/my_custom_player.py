@@ -23,18 +23,18 @@ class CustomPlayer(DataPlayer):
     **********************************************************************
     """
 
-    def get_action(self, state):
+    def get_action(self, state, method="minimax"):
         """ Employ an adversarial search technique to choose an action
         available in the current state calls self.queue.put(ACTION) at least
 
         This method must call self.queue.put(ACTION) at least once, and may
         call it as many times as you want; the caller is responsible for
-        cutting off the function after the search time limit has expired. 
+        cutting off the function after the search time limit has expired.
 
         See RandomPlayer and GreedyPlayer in sample_players for more examples.
 
         **********************************************************************
-        NOTE: 
+        NOTE:
         - The caller is responsible for cutting off search, so calling
           get_action() from your own code will create an infinite loop!
           Refer to (and use!) the Isolation.play() function to run games.
@@ -46,60 +46,84 @@ class CustomPlayer(DataPlayer):
         # EXAMPLE: choose a random move without any search--this function MUST
         #          call self.queue.put(ACTION) at least once before time expires
         #          (the timer is automatically managed for you)
+        # import random
+        # self.queue.put(random.choice(state.actions()))
+        if method == "minimax":
+            f = self.minimax
+        if method == "pvs":
+            f = self.pvs
         depth = 1
         while depth < 100:
-            # (my_moves - opponent_moves) heuristic from lecture
-            self.queue.put(self.minimax(state, depth))
-            # (my_moves / opponent_moves) heuristic from mine
-            # self.queue.put(self.minimax(state, depth, True))
+            self.queue.put(f(state, depth))
             depth += 1
 
-    def minimax(self, state, depth, custom=False):
+    def minimax(self, state, depth):
 
         alpha = float("-inf")
         beta = float("inf")
         best_move = None
         for a in state.actions():
-            v = self.min_value(state.result(a), depth - 1, alpha, beta, custom)
+            v = self.min_value(state.result(a), depth - 1, alpha, beta)
             if v > alpha:
                 alpha = v
                 best_move = a
         return best_move
 
-    def min_value(self, state, depth, alpha, beta, custom):
+    def min_value(self, state, depth, alpha, beta):
         if state.terminal_test():
             return state.utility(self.player_id)
         if depth <= 0:
-            return self.score(state, custom)
+            return self.score(state)
         value = float("inf")
         for action in state.actions():
             value = min(value, self.max_value(
-                state.result(action), depth - 1, alpha, beta, custom))
+                state.result(action), depth - 1, alpha, beta))
             beta = min(beta, value)
             if beta <= alpha:
                 return value
         return value
 
-    def max_value(self, state, depth, alpha, beta, custom):
+    def max_value(self, state, depth, alpha, beta):
         if state.terminal_test():
             return state.utility(self.player_id)
         if depth <= 0:
-            return self.score(state, custom)
+            return self.score(state)
         value = float("-inf")
         for action in state.actions():
             value = max(value, self.min_value(
-                state.result(action), depth - 1, alpha, beta, custom))
+                state.result(action), depth - 1, alpha, beta))
             alpha = max(alpha, value)
             if alpha >= beta:
                 return value
         return value
 
-    def score(self, state, custom):
+    def score(self, state):
         own_loc = state.locs[self.player_id]
         opp_loc = state.locs[1 - self.player_id]
         own_liberties = state.liberties(own_loc)
         opp_liberties = state.liberties(opp_loc)
-        if custom:
-            return len(own_liberties) / len(opp_liberties)
-        else:
-            return len(own_liberties) - len(opp_liberties)
+        return len(own_liberties) - len(opp_liberties)
+
+    def _pvs(self, state, depth, alpha, beta):
+        if state.terminal_test():
+            return state.utility(self.player_id)
+        if depth <= 0:
+            return self.score(state)
+        for i, action in enumerate(state.actions()):
+            child = state.result(action)
+            if i == 0:
+                score = -self._pvs(child, depth-1, -beta, -alpha)
+            else:
+                score = -self._pvs(child, depth-1, -alpha-1, -alpha)
+                if alpha < score < beta:
+                    score = -self._pvs(child, depth-1, -beta, -alpha)
+            alpha = max(alpha, score)
+            if alpha >= beta:
+                break
+        return alpha
+
+    def pvs(self, state, depth):
+        alpha = float("-inf")
+        beta = float("inf")
+        best_move = self._pvs(state, depth, alpha, beta)
+        return best_move
