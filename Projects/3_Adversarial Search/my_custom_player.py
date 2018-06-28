@@ -1,15 +1,12 @@
-
 from sample_players import DataPlayer
 
 
 class CustomPlayer(DataPlayer):
     """ Implement your own agent to play knight's Isolation
-
     The get_action() method is the only *required* method. You can modify
     the interface for get_action by adding named parameters with default
     values, but the function MUST remain compatible with the default
     interface.
-
     **********************************************************************
     NOTES:
     - You should **ONLY** call methods defined on your agent class during
@@ -17,22 +14,18 @@ class CustomPlayer(DataPlayer):
       The isolation library wraps each method of this class to interrupt
       search when the time limit expires, but the wrapper only affects
       methods defined on this class.
-
     - The test cases will NOT be run on a machine with GPU access, nor be
       suitable for using any other machine learning techniques.
     **********************************************************************
     """
 
-    def get_action(self, state, method="minimax"):
+    def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
         available in the current state calls self.queue.put(ACTION) at least
-
         This method must call self.queue.put(ACTION) at least once, and may
         call it as many times as you want; the caller is responsible for
         cutting off the function after the search time limit has expired.
-
         See RandomPlayer and GreedyPlayer in sample_players for more examples.
-
         **********************************************************************
         NOTE:
         - The caller is responsible for cutting off search, so calling
@@ -48,54 +41,118 @@ class CustomPlayer(DataPlayer):
         #          (the timer is automatically managed for you)
         # import random
         # self.queue.put(random.choice(state.actions()))
-        if method == "minimax":
-            f = self.minimax
-        if method == "pvs":
-            f = self.pvs
+
         depth = 1
-        while depth < 100:
-            self.queue.put(f(state, depth))
+        while 1:
+            # self.queue.put(self.alpha_beta_search(state, depth))
+            self.queue.put(self.principal_variation_search(state, depth))
             depth += 1
 
-    def minimax(self, state, depth):
-
+    def alpha_beta_search(self, state, depth):
         alpha = float("-inf")
         beta = float("inf")
         best_move = None
+        player_id = 0
         for a in state.actions():
-            v = self.min_value(state.result(a), depth - 1, alpha, beta)
+            new_state = state.result(a)
+            v = self._alpha_beta_search(
+                new_state, depth-1, alpha, beta, player_id)
             if v > alpha:
                 alpha = v
                 best_move = a
         return best_move
 
-    def min_value(self, state, depth, alpha, beta):
+    def _alpha_beta_search(self, state, depth, alpha, beta, player_id):
         if state.terminal_test():
             return state.utility(self.player_id)
         if depth <= 0:
             return self.score(state)
-        value = float("inf")
-        for action in state.actions():
-            value = min(value, self.max_value(
-                state.result(action), depth - 1, alpha, beta))
-            beta = min(beta, value)
-            if beta <= alpha:
-                return value
-        return value
+        if player_id:
+            v = -float('inf')
+            for action in state.actions():
+                new_state = state.result(action)
+                v = max(v, self._alpha_beta_search(
+                    new_state, depth-1, alpha, beta, player_id ^ 1))
+                alpha = max(alpha, v)
+                if alpha >= beta:
+                    break
+            return v
+        else:
+            v = float('inf')
+            for action in state.actions():
+                new_state = state.result(action)
+                v = min(v, self._alpha_beta_search(
+                    new_state, depth-1, alpha, beta, player_id ^ 1))
+                beta = min(beta, v)
+                if alpha >= beta:
+                    break
+            return v
 
-    def max_value(self, state, depth, alpha, beta):
+    def principal_variation_search(self, state, depth):
+        alpha = float("-inf")
+        beta = float("inf")
+        best_move = None
+        player_id = 0
+        v = -float('inf')
+        for i, action in enumerate(state.actions()):
+            new_state = state.result(action)
+            if i == 0:
+                v = max(v, self._principal_variation_search(
+                    new_state, depth-1, alpha, beta, player_id ^ 1))
+            else:
+                v = max(v, self._principal_variation_search(
+                    new_state, depth-1, alpha, alpha+1, player_id ^ 1))
+                if v > alpha:
+                    v = max(v, self._principal_variation_search(
+                        new_state, depth-1, alpha, beta, player_id ^ 1))
+            if v > alpha:
+                alpha = v
+                best_move = action
+        return best_move
+
+    def _principal_variation_search(self, state, depth, alpha, beta, player_id):
         if state.terminal_test():
             return state.utility(self.player_id)
         if depth <= 0:
             return self.score(state)
-        value = float("-inf")
-        for action in state.actions():
-            value = max(value, self.min_value(
-                state.result(action), depth - 1, alpha, beta))
-            alpha = max(alpha, value)
-            if alpha >= beta:
-                return value
-        return value
+        if player_id:
+            v = -float('inf')
+            for i, action in enumerate(state.actions()):
+                new_state = state.result(action)
+                # v = max(v, self._principal_variation_search(
+                #         new_state, depth-1, alpha, beta, player_id ^ 1))
+                if i == 0:
+                    v = max(v, self._principal_variation_search(
+                        new_state, depth-1, alpha, beta, player_id ^ 1))
+                else:
+                    v = max(v, self._principal_variation_search(
+                        new_state, depth-1, alpha, alpha+1, player_id ^ 1))
+                    if v > alpha:
+                        v = max(v, self._principal_variation_search(
+                            new_state, depth-1, alpha, beta, player_id ^ 1))
+                alpha = max(alpha, v)
+                if alpha >= beta:
+                    break
+            return v
+        else:
+            v = float('inf')
+            for i, action in enumerate(state.actions()):
+                new_state = state.result(action)
+                # v = min(v, self._principal_variation_search(
+                #         new_state, depth-1, alpha, beta, player_id ^ 1))
+                if i == 0:
+                    v = min(v, self._principal_variation_search(
+                        new_state, depth-1, alpha, beta, player_id ^ 1))
+                else:
+                    v = min(v, self._principal_variation_search(
+                        new_state, depth-1, beta-1, beta, player_id ^ 1))
+                    if v < beta:
+                        v = min(v, self._principal_variation_search(
+                            new_state, depth-1, alpha, beta, player_id ^ 1))
+                beta = min(beta, v)
+                if alpha >= beta:
+                    break
+            return v
 
     def score(self, state):
         own_loc = state.locs[self.player_id]
@@ -103,27 +160,3 @@ class CustomPlayer(DataPlayer):
         own_liberties = state.liberties(own_loc)
         opp_liberties = state.liberties(opp_loc)
         return len(own_liberties) - len(opp_liberties)
-
-    def _pvs(self, state, depth, alpha, beta):
-        if state.terminal_test():
-            return state.utility(self.player_id)
-        if depth <= 0:
-            return self.score(state)
-        for i, action in enumerate(state.actions()):
-            child = state.result(action)
-            if i == 0:
-                score = -self._pvs(child, depth-1, -beta, -alpha)
-            else:
-                score = -self._pvs(child, depth-1, -alpha-1, -alpha)
-                if alpha < score < beta:
-                    score = -self._pvs(child, depth-1, -beta, -alpha)
-            alpha = max(alpha, score)
-            if alpha >= beta:
-                break
-        return alpha
-
-    def pvs(self, state, depth):
-        alpha = float("-inf")
-        beta = float("inf")
-        best_move = self._pvs(state, depth, alpha, beta)
-        return best_move
