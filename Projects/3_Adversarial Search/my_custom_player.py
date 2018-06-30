@@ -44,8 +44,8 @@ class CustomPlayer(DataPlayer):
 
         depth = 1
         while 1:
-            # self.queue.put(self.alpha_beta_search(state, depth))
-            self.queue.put(self.principal_variation_search(state, depth))
+            self.queue.put(self.alpha_beta_search(state, depth))
+            # self.queue.put(self.principal_variation_search(state, depth))
             depth += 1
 
     def alpha_beta_search(self, state, depth):
@@ -54,6 +54,8 @@ class CustomPlayer(DataPlayer):
         actions = state.actions()
         if actions:
             best_move = actions[0]
+        else:
+            best_move = None
         player_id = 0
         for a in actions:
             new_state = state.result(a)
@@ -96,19 +98,21 @@ class CustomPlayer(DataPlayer):
         actions = state.actions()
         if actions:
             best_move = actions[0]
+        else:
+            best_move = None
         player_id = 0
         v = -float('inf')
         for i, action in enumerate(actions):
             new_state = state.result(action)
             if i == 0:
                 v = max(v, self._principal_variation_search(
-                    new_state, depth-1, alpha, beta, player_id ^ 1))
+                    new_state, depth-1, alpha, beta, player_id))
             else:
                 v = max(v, self._principal_variation_search(
-                    new_state, depth-1, alpha, alpha+1, player_id ^ 1))
+                    new_state, depth-1, alpha, alpha+1, player_id))
                 if v > alpha:
                     v = max(v, self._principal_variation_search(
-                        new_state, depth-1, alpha, beta, player_id ^ 1))
+                        new_state, depth-1, alpha, beta, player_id))
             if v > alpha:
                 alpha = v
                 best_move = action
