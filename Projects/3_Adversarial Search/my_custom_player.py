@@ -51,9 +51,11 @@ class CustomPlayer(DataPlayer):
     def alpha_beta_search(self, state, depth):
         alpha = float("-inf")
         beta = float("inf")
-        best_move = None
+        actions = state.actions()
+        if actions:
+            best_move = actions[0]
         player_id = 0
-        for a in state.actions():
+        for a in actions:
             new_state = state.result(a)
             v = self._alpha_beta_search(
                 new_state, depth-1, alpha, beta, player_id)
@@ -91,10 +93,12 @@ class CustomPlayer(DataPlayer):
     def principal_variation_search(self, state, depth):
         alpha = float("-inf")
         beta = float("inf")
-        best_move = None
+        actions = state.actions()
+        if actions:
+            best_move = actions[0]
         player_id = 0
         v = -float('inf')
-        for i, action in enumerate(state.actions()):
+        for i, action in enumerate(actions):
             new_state = state.result(action)
             if i == 0:
                 v = max(v, self._principal_variation_search(
@@ -119,8 +123,6 @@ class CustomPlayer(DataPlayer):
             v = -float('inf')
             for i, action in enumerate(state.actions()):
                 new_state = state.result(action)
-                # v = max(v, self._principal_variation_search(
-                #         new_state, depth-1, alpha, beta, player_id ^ 1))
                 if i == 0:
                     v = max(v, self._principal_variation_search(
                         new_state, depth-1, alpha, beta, player_id ^ 1))
@@ -138,8 +140,6 @@ class CustomPlayer(DataPlayer):
             v = float('inf')
             for i, action in enumerate(state.actions()):
                 new_state = state.result(action)
-                # v = min(v, self._principal_variation_search(
-                #         new_state, depth-1, alpha, beta, player_id ^ 1))
                 if i == 0:
                     v = min(v, self._principal_variation_search(
                         new_state, depth-1, alpha, beta, player_id ^ 1))
